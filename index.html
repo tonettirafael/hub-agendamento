@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUB de Agendamentos — Jornada do Produto · nstech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ====================== TOKENS ====================== */
+:root{
+  --orange:#FF3D03;
+  --orange-soft:#FF6B3D;
+  --orange-deep:#E62E00;
+  --ink:#000032;
+  --ink-2:#0A0A3E;
+  --graphite:#424449;
+  --silver:#C5CAD2;
+  --silver-2:#EEF0F3;
+  --paper:#FAFAFA;
+  --white:#FFFFFF;
+  --grid:rgba(255,255,255,0.06);
+  --grid-strong:rgba(255,255,255,0.12);
+  --font-display:"Barlow", system-ui, sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, monospace;
+  --r-sm:6px;
+  --r-md:12px;
+  --r-lg:20px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-display);
+  background:var(--ink);
+  color:var(--white);
+  font-weight:400;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+
+/* grid pattern de fundo (sutil) */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);
+}
+
+/* ====================== HELPERS ====================== */
+.wrap{max-width:1200px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+.eyebrow{
+  font-size:12px;letter-spacing:0.32em;text-transform:uppercase;
+  color:var(--orange);font-weight:600;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:12px 22px;border-radius:var(--r-sm);
+  background:var(--orange);color:var(--white);
+  font-family:var(--font-display);font-weight:600;
+  text-decoration:none;border:none;cursor:pointer;
+  font-size:14px;letter-spacing:0.05em;
+  transition:transform .2s ease,background .2s ease;
+}
+.btn:hover{background:var(--orange-deep);transform:translateY(-1px)}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.25);color:var(--white)}
+.btn.ghost:hover{border-color:var(--orange);color:var(--orange);background:transparent}
+
+/* ====================== NAV ====================== */
+.nav{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(12px);
+  background:rgba(0,0,50,0.7);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px;max-width:1400px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:0.02em}
+.brand-dots{display:flex;align-items:center;gap:3px}
+.brand-dots .dot{width:9px;height:9px;border-radius:50%;background:var(--orange)}
+.brand-dots .bar{width:10px;height:2px;background:var(--orange)}
+.brand-dots .dot.small{width:6px;height:6px}
+.nav-links{display:flex;gap:28px;font-size:13px;font-weight:500}
+.nav-links a{color:rgba(255,255,255,0.7);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--orange)}
+@media (max-width: 720px){ .nav-links{display:none} }
+
+/* ====================== HERO ====================== */
+.hero{
+  padding:120px 0 100px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;
+  right:-200px;top:-100px;
+  width:600px;height:600px;
+  background:radial-gradient(circle at center,rgba(255,61,3,0.18),transparent 70%);
+  filter:blur(60px);
+  z-index:0;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:1.4fr 1fr;
+  gap:80px;
+  align-items:center;
+}
+@media (max-width:920px){ .hero-grid{grid-template-columns:1fr;gap:48px} }
+
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:800;
+  font-size:clamp(48px, 7vw, 92px);
+  line-height:0.95;
+  letter-spacing:-0.02em;
+  margin:24px 0;
+}
+.hero h1 .accent{color:var(--orange)}
+.hero h1 .stack{display:block}
+.hero-sub{
+  font-size:18px;color:rgba(255,255,255,0.7);max-width:540px;
+  margin-bottom:36px;line-height:1.6;
+}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+
+.hero-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-lg);
+  padding:32px;
+  position:relative;
+}
+.hero-card::before{
+  content:"";position:absolute;top:0;left:0;width:60px;height:3px;
+  background:var(--orange);
+}
+.hero-card-label{
+  font-size:11px;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--orange);font-weight:600;margin-bottom:20px;
+}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+.stat-item .num{font-size:42px;font-weight:800;color:var(--white);line-height:1}
+.stat-item .num .unit{color:var(--orange)}
+.stat-item .label{font-size:12px;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.4}
+
+/* ====================== SECTION HEADERS ====================== */
+.section{padding:80px 0;position:relative;z-index:1}
+.section-head{margin-bottom:60px;max-width:760px}
+.section-head h2{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(32px,4vw,52px);
+  line-height:1.05;
+  letter-spacing:-0.02em;
+  margin-top:16px;
+}
+.section-head .lead{
+  font-size:17px;color:rgba(255,255,255,0.65);
+  margin-top:18px;line-height:1.6;
+}
+
+/* ====================== JOURNEY DIAGRAM ====================== */
+.journey{
+  position:relative;
+  display:grid;
+  grid-template-columns:200px 1fr;
+  gap:0;
+}
+@media (max-width:780px){ .journey{grid-template-columns:1fr} }
+
+/* Rail vertical */
+.rail{
+  position:relative;
+}
+.rail-line{
+  position:absolute;left:30px;top:30px;bottom:30px;width:2px;
+  background:linear-gradient(to bottom,
+    var(--graphite) 0%,
+    var(--graphite) 8%,
+    var(--orange) 18%,
+    var(--orange) 88%,
+    rgba(255,61,3,0.2) 100%);
+}
+.rail-marker{
+  position:absolute;left:18px;
+  display:flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--ink);
+  border:2px solid var(--orange);
+  font-size:11px;font-weight:700;color:var(--orange);
+  font-family:var(--font-mono);
+}
+.rail-marker.muted{border-color:var(--graphite);color:var(--silver)}
+.rail-stage{
+  position:absolute;left:62px;
+  font-size:10px;letter-spacing:0.25em;text-transform:uppercase;
+  color:rgba(255,255,255,0.4);
+  width:130px;
+  font-weight:600;
+}
+
+/* Cards de etapa */
+.stages{display:flex;flex-direction:column;gap:24px;padding-bottom:40px}
+.stage{
+  background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-lg);
+  padding:32px;
+  position:relative;
+  overflow:hidden;
+  transition:transform .3s ease,border-color .3s ease;
+}
+.stage:hover{transform:translateY(-2px);border-color:rgba(255,61,3,0.4)}
+
+.stage.external{border-color:rgba(196,202,210,0.18)}
+.stage.external .stage-tag{background:var(--graphite);color:var(--silver)}
+.stage.hub .stage-tag{background:var(--orange);color:var(--white)}
+
+.stage-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:24px;margin-bottom:16px;flex-wrap:wrap;
+}
+.stage-num{
+  font-family:var(--font-mono);
+  font-size:13px;color:var(--orange);font-weight:600;letter-spacing:0.1em;
+  margin-bottom:6px;
+}
+.stage h3{
+  font-family:var(--font-display);
+  font-size:26px;font-weight:700;line-height:1.15;letter-spacing:-0.01em;
+  color:var(--white);
+}
+.stage-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 12px;border-radius:var(--r-sm);
+  font-size:10px;letter-spacing:0.2em;text-transform:uppercase;font-weight:700;
+  white-space:nowrap;
+}
+.stage-tag::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;
+}
+.stage-meta{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:18px;margin-bottom:20px;
+}
+@media (max-width:540px){ .stage-meta{grid-template-columns:1fr} }
+.meta-block{}
+.meta-label{
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+  color:rgba(255,255,255,0.5);font-weight:600;margin-bottom:6px;
+}
+.meta-value{font-size:14px;color:var(--white);font-weight:500;line-height:1.4}
+
+.stage-desc{
+  font-size:15px;color:rgba(255,255,255,0.75);line-height:1.65;
+  border-left:2px solid var(--orange);
+  padding-left:16px;
+  margin-bottom:24px;
+}
+
+/* Sub-fluxos / bifurcações */
+.subflow{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:14px;margin-top:24px;
+}
+.subflow.three{grid-template-columns:repeat(3,1fr)}
+.subflow.four{grid-template-columns:repeat(2,1fr)}
+@media (max-width:680px){ .subflow,.subflow.three,.subflow.four{grid-template-columns:1fr} }
+.branch{
+  background:rgba(0,0,0,0.25);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-md);
+  padding:18px;
+  position:relative;
+  transition:border-color .2s;
+}
+.branch:hover{border-color:rgba(255,61,3,0.5)}
+.branch-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.branch-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,61,3,0.15);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--orange);
+  flex-shrink:0;
+}
+.branch-icon svg{width:16px;height:16px}
+.branch-title{font-weight:600;font-size:14px;color:var(--white)}
+.branch-pill{
+  margin-left:auto;
+  font-size:9px;font-weight:700;letter-spacing:0.18em;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(255,61,3,0.18);color:var(--orange);
+}
+.branch-pill.manual{background:rgba(196,202,210,0.12);color:var(--silver)}
+.branch-desc{font-size:12.5px;color:rgba(255,255,255,0.6);line-height:1.55}
+
+/* Tela real do produto (screenshot) */
+.screen{
+  margin-top:24px;
+  background:linear-gradient(180deg,rgba(0,0,0,0.4),rgba(0,0,0,0.2));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-md);
+  padding:14px;
+  position:relative;
+  overflow:hidden;
+}
+.screen-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  margin-bottom:12px;
+}
+.screen-bar .traffic{display:flex;gap:5px}
+.screen-bar .traffic span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.18)}
+.screen-bar .traffic span:first-child{background:var(--orange)}
+.screen-bar .traffic span:nth-child(2){background:rgba(255,255,255,0.28)}
+.screen-bar .title{
+  font-family:var(--font-mono);
+  font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(255,255,255,0.55);
+}
+.screen-bar .pill{
+  margin-left:auto;
+  font-size:9px;font-weight:700;letter-spacing:0.18em;
+  padding:4px 9px;border-radius:4px;
+  background:rgba(255,61,3,0.18);color:var(--orange);
+  text-transform:uppercase;
+}
+.screen-img{width:100%;display:block;border-radius:6px;background:#fff}
+.screen-caption{
+  display:flex;align-items:flex-start;gap:12px;
+  margin-top:16px;padding:0 4px;
+  font-size:12.5px;color:rgba(255,255,255,0.62);line-height:1.55;
+}
+.screen-caption::before{
+  content:"";flex-shrink:0;
+  width:3px;height:36px;background:var(--orange);
+  border-radius:1px;
+}
+
+/* Diagrama "telas" do produto (mock interno) */
+.product-shot{
+  background:rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--r-md);
+  padding:18px;
+  margin-top:22px;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+}
+.shot-bar{
+  display:flex;align-items:center;gap:6px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:14px;
+}
+.shot-bar .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,0.18)}
+.shot-bar .dot:first-child{background:var(--orange)}
+.shot-bar .title{
+  margin-left:14px;font-size:10px;letter-spacing:0.18em;
+  color:rgba(255,255,255,0.5);text-transform:uppercase;
+}
+.shot-rows{display:grid;gap:10px}
+.shot-row{
+  display:grid;
+  grid-template-columns:1fr auto auto auto;
+  align-items:center;gap:14px;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.025);
+  border-left:2px solid var(--orange);
+  border-radius:4px;
+  font-size:12px;
+}
+.shot-row .id{color:rgba(255,255,255,0.55)}
+.shot-row .date{color:rgba(255,255,255,0.8)}
+.shot-row .badge{
+  font-size:9px;font-weight:700;letter-spacing:0.15em;
+  padding:3px 8px;border-radius:4px;text-transform:uppercase;
+}
+.b-ok{background:rgba(29,158,117,0.18);color:#5DCAA5}
+.b-wait{background:rgba(255,61,3,0.18);color:var(--orange)}
+.b-fail{background:rgba(226,75,74,0.18);color:#F09595}
+
+/* ====================== FLUXO HORIZONTAL TOPO ====================== */
+.overview{
+  margin-top:48px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-lg);
+  padding:36px 28px;
+  overflow-x:auto;
+}
+.overview-flow{
+  display:flex;align-items:stretch;gap:14px;min-width:780px;
+}
+.flow-node{
+  flex:1;min-width:120px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-md);
+  padding:18px 16px;
+  position:relative;
+  text-align:center;
+}
+.flow-node.external{border-color:rgba(196,202,210,0.18)}
+.flow-node.hub{
+  background:linear-gradient(180deg,rgba(255,61,3,0.18),rgba(255,61,3,0.05));
+  border-color:rgba(255,61,3,0.4);
+}
+.flow-node .n{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:0.18em;
+  color:var(--orange);font-weight:700;margin-bottom:8px;
+}
+.flow-node.external .n{color:var(--silver)}
+.flow-node .t{font-size:14px;font-weight:600;line-height:1.2;margin-bottom:6px}
+.flow-node .s{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.4}
+.flow-arrow{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--orange);font-size:18px;font-weight:700;
+  flex:0 0 18px;
+}
+
+/* ====================== SITUACIONAIS ====================== */
+.situational{
+  display:grid;grid-template-columns:1fr 1fr;gap:24px;
+  margin-top:8px;
+}
+@media (max-width:780px){ .situational{grid-template-columns:1fr} }
+.sit-card{
+  background:linear-gradient(145deg,rgba(255,61,3,0.08),rgba(255,255,255,0.02));
+  border:1px solid rgba(255,61,3,0.25);
+  border-radius:var(--r-lg);
+  padding:32px;
+  position:relative;
+}
+.sit-card::before{
+  content:"";position:absolute;top:0;right:0;width:120px;height:120px;
+  background:radial-gradient(circle,rgba(255,61,3,0.15),transparent 70%);
+  border-radius:50%;
+  filter:blur(20px);
+}
+.sit-tag{
+  display:inline-block;
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--orange);font-weight:700;
+  background:rgba(255,61,3,0.15);
+  padding:5px 11px;border-radius:4px;
+}
+.sit-card h3{
+  font-size:26px;font-weight:700;margin:18px 0 10px;line-height:1.15;letter-spacing:-0.01em;
+}
+.sit-card p{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:18px}
+.sit-list{list-style:none;display:grid;gap:10px}
+.sit-list li{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13.5px;color:rgba(255,255,255,0.78);line-height:1.5;
+}
+.sit-list li::before{
+  content:"";width:6px;height:6px;background:var(--orange);
+  border-radius:1px;margin-top:7px;flex-shrink:0;
+}
+.sit-list b{color:var(--white);font-weight:600}
+
+/* ====================== BENEFITS ====================== */
+.benefits-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+@media (max-width:920px){ .benefits-grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:540px){ .benefits-grid{grid-template-columns:1fr} }
+.benefit{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:var(--r-md);
+  padding:24px;
+  border-top:3px solid var(--orange);
+  transition:transform .25s,background .25s;
+}
+.benefit:hover{transform:translateY(-3px);background:rgba(255,61,3,0.08)}
+.benefit-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:rgba(255,61,3,0.15);color:var(--orange);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;
+}
+.benefit-icon svg{width:22px;height:22px}
+.benefit h4{font-size:17px;font-weight:600;margin-bottom:8px;letter-spacing:-0.01em}
+.benefit p{font-size:13px;color:rgba(255,255,255,0.65);line-height:1.55}
+
+/* ====================== FOOTER / CTA ====================== */
+.cta{
+  margin-top:80px;
+  padding:80px 48px;
+  border-radius:var(--r-lg);
+  background:linear-gradient(135deg,var(--orange) 0%,var(--orange-deep) 100%);
+  position:relative;overflow:hidden;
+}
+.cta::before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.08) 1px,transparent 1px);
+  background-size:32px 32px;
+  mask-image:radial-gradient(ellipse at center,#000 30%,transparent 80%);
+}
+.cta-inner{position:relative;z-index:1;max-width:760px}
+.cta h2{font-size:clamp(32px,4vw,48px);font-weight:800;line-height:1.05;margin-bottom:20px;letter-spacing:-0.02em}
+.cta p{font-size:17px;color:rgba(255,255,255,0.9);margin-bottom:28px;max-width:560px}
+.cta .btn{background:var(--white);color:var(--orange-deep)}
+.cta .btn:hover{background:var(--ink);color:var(--white)}
+.cta .btn.ghost{background:transparent;color:var(--white);border-color:rgba(255,255,255,0.5)}
+.cta .btn.ghost:hover{background:var(--white);color:var(--orange-deep);border-color:var(--white)}
+
+footer{
+  padding:48px 0 64px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  margin-top:60px;
+  font-size:12px;
+  color:rgba(255,255,255,0.5);
+  text-align:center;
+  letter-spacing:0.04em;
+}
+
+/* ====================== ANIMAÇÕES ====================== */
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <span>nstech</span>
+      <span class="brand-dots">
+        <span class="dot"></span><span class="bar"></span>
+        <span class="dot"></span><span class="dot small"></span>
+      </span>
+    </div>
+    <div class="nav-links">
+      <a href="#overview">Visão geral</a>
+      <a href="#jornada">Jornada</a>
+      <a href="#situacionais">Cenários</a>
+      <a href="#beneficios">Benefícios</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Produto · nstech · v2.1</div>
+        <h1>
+          <span class="stack">HUB de</span>
+          <span class="stack accent">Agendamentos.</span>
+        </h1>
+        <p class="hero-sub">
+          Um portal único que centraliza a visão de todas as agendas e automatiza solicitações em portais e e-mails — reduzindo trabalho manual e dando previsibilidade à operação.
+        </p>
+        <div class="hero-cta">
+          <a class="btn" href="#jornada">Explorar a jornada →</a>
+          <a class="btn ghost" href="#beneficios">Ver benefícios</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <div class="hero-card-label">A jornada em números</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.72);line-height:1.5">
+          5 etapas principais conectando o pedido de compra à formalização com o transportador — com 2 cenários situacionais cobrindo cancelamentos e reagendamentos.
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="num">5<span class="unit">·</span></div>
+            <div class="label">Etapas conectadas em um único fluxo</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">2<span class="unit">+</span></div>
+            <div class="label">Cenários situacionais cobertos</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">3<span class="unit">.</span></div>
+            <div class="label">Personas envolvidas no processo</div>
+          </div>
+          <div class="stat-item">
+            <div class="num">∞<span class="unit"></span></div>
+            <div class="label">Cargas centralizadas no portal</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</header>
+
+<!-- OVERVIEW HORIZONTAL -->
+<section class="section" id="overview">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">01 · Visão geral</div>
+      <h2>Do pedido de compra à formalização — em um só fluxo.</h2>
+      <p class="lead">
+        A primeira etapa acontece nos sistemas do fornecedor. Da segunda em diante, o HUB assume.
+      </p>
+    </div>
+
+    <div class="overview reveal">
+      <div class="overview-flow">
+        <div class="flow-node external">
+          <div class="n">01 · ERP/TMS</div>
+          <div class="t">Pedido</div>
+          <div class="s">Comprador e fornecedor</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node hub">
+          <div class="n">02 · HUB</div>
+          <div class="t">Entrada</div>
+          <div class="s">Cargas inseridas no portal</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node hub">
+          <div class="n">03 · HUB</div>
+          <div class="t">Solicitação</div>
+          <div class="s">Agenda pedida ao cliente</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node hub">
+          <div class="n">04 · HUB</div>
+          <div class="t">Confirmação</div>
+          <div class="s">Status atualizado</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node hub">
+          <div class="n">05 · HUB</div>
+          <div class="t">Formalização</div>
+          <div class="s">Envio ao transportador</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JORNADA DETALHADA -->
+<section class="section" id="jornada">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">02 · Jornada detalhada</div>
+      <h2>Cada etapa, em profundidade.</h2>
+      <p class="lead">
+        O HUB foi pensado para absorver todos os caminhos que a operação real apresenta — com automação, com manual, com nota fiscal obrigatória, com e-mail. Tudo no mesmo portal.
+      </p>
+    </div>
+
+    <div class="journey reveal">
+      <!-- RAIL VERTICAL -->
+      <div class="rail" aria-hidden="true">
+        <div class="rail-line"></div>
+        <div class="rail-marker muted" style="top:30px">01</div>
+        <div class="rail-stage" style="top:34px">FORA DO HUB</div>
+        <div class="rail-marker" style="top:340px">02</div>
+        <div class="rail-stage" style="top:344px">DENTRO DO HUB</div>
+        <div class="rail-marker" style="top:680px">03</div>
+        <div class="rail-marker" style="top:1180px">04</div>
+        <div class="rail-marker" style="top:1620px">05</div>
+      </div>
+
+      <!-- STAGES -->
+      <div class="stages">
+
+        <!-- ETAPA 1 -->
+        <article class="stage external" id="etapa-1">
+          <div class="stage-header">
+            <div>
+              <div class="stage-num">ETAPA 01</div>
+              <h3>Pedido de compra e planejamento de cargas</h3>
+            </div>
+            <span class="stage-tag">Origem externa</span>
+          </div>
+          <div class="stage-meta">
+            <div class="meta-block">
+              <div class="meta-label">Onde acontece</div>
+              <div class="meta-value">ERP · TMS · Planilha</div>
+            </div>
+            <div class="meta-block">
+              <div class="meta-label">Personas</div>
+              <div class="meta-value">Comprador e Fornecedor</div>
+            </div>
+          </div>
+          <p class="stage-desc">
+            O comprador faz o pedido ao fornecedor. O fornecedor recebe e monta o planejamento das cargas que serão entregues. Essa etapa acontece nos sistemas atuais do fornecedor — antes da carga entrar no HUB.
+          </p>
+        </article>
+
+        <!-- ETAPA 2 -->
+        <article class="stage hub" id="etapa-2">
+          <div class="stage-header">
+            <div>
+              <div class="stage-num">ETAPA 02</div>
+              <h3>Entrada das cargas no portal</h3>
+            </div>
+            <span class="stage-tag">No HUB</span>
+          </div>
+          <div class="stage-meta">
+            <div class="meta-block">
+              <div class="meta-label">Onde acontece</div>
+              <div class="meta-value">HUB de Agendamentos</div>
+            </div>
+            <div class="meta-block">
+              <div class="meta-label">Persona</div>
+              <div class="meta-value">Fornecedor — Logística</div>
+            </div>
+          </div>
+          <p class="stage-desc">
+            O planejamento de cargas é inserido no HUB pelo time de logística. A entrada acontece de duas formas conforme a maturidade do cliente.
+          </p>
+          <div class="subflow">
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6M15 2v6M5 8h14v12H5zM9 14h6"/></svg>
+                </div>
+                <div class="branch-title">Via integração</div>
+                <span class="branch-pill">Automático</span>
+              </div>
+              <p class="branch-desc">Os dados entram no HUB diretamente pela conexão com o ERP/TMS do fornecedor.</p>
+            </div>
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                </div>
+                <div class="branch-title">Via planilha</div>
+                <span class="branch-pill manual">Upload</span>
+              </div>
+              <p class="branch-desc">Quando não há integração, o time faz upload de uma planilha com as cargas a agendar.</p>
+            </div>
+          </div>
+
+          <div class="screen">
+            <div class="screen-bar">
+              <div class="traffic"><span></span><span></span><span></span></div>
+              <div class="title">Central de Agendamentos · Importação de cargas</div>
+              <div class="pill">Tela do produto</div>
+            </div>
+            <img class="screen-img" src="assets/etapa-2-importacao.png" alt="Tela de importação de cargas do HUB de Agendamentos mostrando a prévia dos dados importados com 90 registros e o passo de mapeamento de colunas.">
+            <div class="screen-caption">
+              Painel de importação por planilha — exibe a prévia dos registros e o mapeamento das colunas do arquivo para os campos do sistema, em duas etapas guiadas.
+            </div>
+          </div>
+        </article>
+
+        <!-- ETAPA 3 -->
+        <article class="stage hub" id="etapa-3">
+          <div class="stage-header">
+            <div>
+              <div class="stage-num">ETAPA 03</div>
+              <h3>Solicitação da agenda ao cliente</h3>
+            </div>
+            <span class="stage-tag">Coração do HUB</span>
+          </div>
+          <div class="stage-meta">
+            <div class="meta-block">
+              <div class="meta-label">Onde acontece</div>
+              <div class="meta-value">HUB de Agendamentos</div>
+            </div>
+            <div class="meta-block">
+              <div class="meta-label">Persona</div>
+              <div class="meta-value">Fornecedor — Agendamento</div>
+            </div>
+          </div>
+          <p class="stage-desc">
+            Cada cliente tem um canal diferente — portal com automação, portal sem automação, e-mail. O HUB cobre todos. Em clientes que exigem nota fiscal, a solicitação só ocorre após o faturamento.
+          </p>
+          <div class="subflow four">
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>
+                </div>
+                <div class="branch-title">Portal · com automação</div>
+                <span class="branch-pill">Automático</span>
+              </div>
+              <p class="branch-desc">A solicitação é feita pelo sistema, sem digitação manual.</p>
+            </div>
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12V6a3 3 0 1 1 6 0v6M5 12h14l-1 9H6z"/></svg>
+                </div>
+                <div class="branch-title">Portal · sem automação</div>
+                <span class="branch-pill manual">Manual</span>
+              </div>
+              <p class="branch-desc">O time solicita no portal do cliente, com controle dentro do HUB.</p>
+            </div>
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+                </div>
+                <div class="branch-title">E-mail · com template</div>
+                <span class="branch-pill">Template</span>
+              </div>
+              <p class="branch-desc">E-mail padrão enviado; resposta pode ser automatizada.</p>
+            </div>
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l4 4v14H5V3z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+                </div>
+                <div class="branch-title">Quando a NF é obrigatória</div>
+                <span class="branch-pill manual">Condicional</span>
+              </div>
+              <p class="branch-desc">Só ocorre após o faturamento da nota fiscal.</p>
+            </div>
+          </div>
+
+          <div class="screen">
+            <div class="screen-bar">
+              <div class="traffic"><span></span><span></span><span></span></div>
+              <div class="title">Central de Agendamentos · Portal de agendas</div>
+              <div class="pill">Tela do produto</div>
+            </div>
+            <img class="screen-img" src="assets/etapa-3-portal-agendas.png" alt="Portal de Agendas do HUB de Agendamentos exibindo as cargas em todos os status — Pendente, Pendente NFe, Solicitada, Conquistada, Formalizada, Replanejada e Cancelada — com indicação de automação por carga, cliente, data de criação, método, status e SLA.">
+            <div class="screen-caption">
+              Portal de agendas — visão consolidada de todas as cargas com filtro por status, indicador de automação por linha, cliente, data, método de agendamento e SLA em tempo real.
+            </div>
+          </div>
+        </article>
+
+        <!-- ETAPA 4 -->
+        <article class="stage hub" id="etapa-4">
+          <div class="stage-header">
+            <div>
+              <div class="stage-num">ETAPA 04</div>
+              <h3>Confirmação e registro da agenda</h3>
+            </div>
+            <span class="stage-tag">Status unificado</span>
+          </div>
+          <div class="stage-meta">
+            <div class="meta-block">
+              <div class="meta-label">Onde acontece</div>
+              <div class="meta-value">HUB de Agendamentos</div>
+            </div>
+            <div class="meta-block">
+              <div class="meta-label">Persona</div>
+              <div class="meta-value">Fornecedor — Agendamento</div>
+            </div>
+          </div>
+          <p class="stage-desc">
+            A resposta do cliente atualiza o agendamento — data, hora, senha/protocolo. Quando há automação, o sistema captura. Sem automação, dados manuais ou integrados de outro sistema.
+          </p>
+
+          <div class="screen">
+            <div class="screen-bar">
+              <div class="traffic"><span></span><span></span><span></span></div>
+              <div class="title">Central de Agendamentos · Detalhe da carga</div>
+              <div class="pill">Tela do produto</div>
+            </div>
+            <img class="screen-img" src="assets/etapa-4-detalhe-carga.png" alt="Tela de detalhe da carga no HUB de Agendamentos exibindo agendamento de coleta e entrega com status Formalizada, protocolos, datas sugeridas e efetivas, integração concluída com sucesso, e ações de reagendamento e cancelamento.">
+            <div class="screen-caption">
+              Detalhe da carga — exibe coleta e entrega lado a lado, com protocolo, datas solicitada/efetiva, confirmação da integração com o cliente e ações para reagendar ou cancelar.
+            </div>
+          </div>
+        </article>
+
+        <!-- ETAPA 5 -->
+        <article class="stage hub" id="etapa-5">
+          <div class="stage-header">
+            <div>
+              <div class="stage-num">ETAPA 05</div>
+              <h3>Formalização com transportadores</h3>
+            </div>
+            <span class="stage-tag">Fecha o ciclo</span>
+          </div>
+          <div class="stage-meta">
+            <div class="meta-block">
+              <div class="meta-label">Onde acontece</div>
+              <div class="meta-value">HUB de Agendamentos</div>
+            </div>
+            <div class="meta-block">
+              <div class="meta-label">Persona</div>
+              <div class="meta-value">Fornecedor — Agendamento</div>
+            </div>
+          </div>
+          <p class="stage-desc">
+            Com a agenda confirmada, o HUB envia a formalização automática para o transportador. A configuração define como:
+          </p>
+          <div class="subflow">
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </div>
+                <div class="branch-title">Agenda a agenda</div>
+                <span class="branch-pill">Tempo real</span>
+              </div>
+              <p class="branch-desc">Cada agenda confirmada dispara um envio individual para o transportador responsável.</p>
+            </div>
+            <div class="branch">
+              <div class="branch-head">
+                <div class="branch-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/></svg>
+                </div>
+                <div class="branch-title">Rotina em lote</div>
+                <span class="branch-pill">A cada X horas</span>
+              </div>
+              <p class="branch-desc">Agendas agrupadas por transportador em uma lista consolidada, na cadência definida.</p>
+            </div>
+          </div>
+
+          <div class="screen">
+            <div class="screen-bar">
+              <div class="traffic"><span></span><span></span><span></span></div>
+              <div class="title">Notificação automática · enviada à transportadora</div>
+              <div class="pill">Saída do sistema</div>
+            </div>
+            <img class="screen-img" src="assets/etapa-5-notificacao-transportadora.png" alt="E-mail automático de notificação de cargas agendadas enviado pelo HUB à transportadora TECPET, listando 2 cargas com shipment, código do cliente, origem, senha e data efetiva, com texto pronto para colar em Excel.">
+            <div class="screen-caption">
+              E-mail consolidado enviado à transportadora — relaciona as cargas sob sua responsabilidade com shipment, cliente, origem, senha e data efetiva. Pronto para colar diretamente no Excel.
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SITUACIONAIS -->
+<section class="section" id="situacionais">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">03 · Cenários situacionais</div>
+      <h2>Quando algo foge do fluxo padrão, o HUB cobre.</h2>
+      <p class="lead">
+        Cancelamentos, no-shows e reagendamentos são parte da operação real — e seguem dentro do mesmo portal, com visibilidade imediata para o time.
+      </p>
+    </div>
+
+    <div class="situational reveal">
+      <article class="sit-card">
+        <div class="sit-tag">Cenário A</div>
+        <h3>Cancelamento e No-show</h3>
+        <p>O portal sinaliza imediatamente as cargas com status crítico para o time atuar — solicitando uma nova agenda quando necessário.</p>
+        <ul class="sit-list">
+          <li><span><b>Com automação:</b> o portal é notificado, o status aparece e o time atua na sequência.</span></li>
+          <li><span><b>Sem automação:</b> o time altera o status manualmente, mantendo a visibilidade da operação.</span></li>
+          <li><span><b>Reação rápida:</b> nenhuma carga fica perdida fora do radar.</span></li>
+        </ul>
+      </article>
+
+      <article class="sit-card">
+        <div class="sit-tag">Cenário B</div>
+        <h3>Reagendamento</h3>
+        <p>Quando uma agenda confirmada precisa mudar, o pedido de nova data segue o mesmo fluxo da solicitação original.</p>
+        <ul class="sit-list">
+          <li><span><b>Direto pelo portal:</b> solicitação de nova data sem sair do HUB.</span></li>
+          <li><span><b>Mesmo padrão:</b> rastreabilidade preservada do início ao fim.</span></li>
+          <li><span><b>Histórico:</b> a agenda original e a nova ficam vinculadas.</span></li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFÍCIOS -->
+<section class="section" id="beneficios">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">04 · Benefícios e resultados</div>
+      <h2>O que muda na operação com o HUB.</h2>
+    </div>
+
+    <div class="benefits-grid reveal">
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h4>Visão única</h4>
+        <p>Portais, e-mails e planilhas convergindo em um só lugar — todas as agendas em um só portal.</p>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4M8 16h.01M16 16h.01"/></svg>
+        </div>
+        <h4>Solicitação automática</h4>
+        <p>Em portais com automação, o sistema faz a solicitação sem digitação manual do time.</p>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+        </div>
+        <h4>E-mail padronizado</h4>
+        <p>Template único de solicitação por e-mail; captura automática de respostas quando possível.</p>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        </div>
+        <h4>Reação rápida</h4>
+        <p>Cancelamentos e no-shows aparecem no portal e direcionam a ação do time imediatamente.</p>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+        </div>
+        <h4>Transportador formalizado</h4>
+        <p>Envio automático das agendas confirmadas — agenda a agenda ou agrupado por rotina.</p>
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 6-6"/></svg>
+        </div>
+        <h4>Gestão da agenda</h4>
+        <p>Status, histórico e indicadores ao alcance do gestor — decisões baseadas em dados.</p>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta reveal">
+      <div class="cta-inner">
+        <h2>Pronto para centralizar sua agenda?</h2>
+        <p>Visibilidade total. Automação no portal e no e-mail. Menos retrabalho — mais tempo para o que importa na operação.</p>
+        <div class="hero-cta">
+          <a class="btn" href="#">Solicitar demonstração</a>
+          <a class="btn ghost" href="#jornada">Revisar a jornada</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  HUB DE AGENDAMENTOS · BRANDBOOK V2.1 · GUIA DE IDENTIDADE VISUAL · nstech 2026
+</footer>
+
+<script>
+// Reveal-on-scroll
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
